@@ -1,3 +1,3 @@
-with "https://data.anfr.fr/api/records/1.0/search/format=csv&dataset=dd11fac6-4531-4a27-9c8c-a3a9e4ec2107" as url
+with "https://data.anfr.fr/api/records/1.0/search/dataset=dd11fac6-4531-4a27-9c8c-a3a9e4ec2107" as url
 call  apoc.load.json(url) yield value
 return value
