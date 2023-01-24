@@ -24,4 +24,10 @@ Création du graph :
 with "https://data.anfr.fr/api/records/1.0/search/dataset=dd11fac6-4531-4a27-9c8c-a3a9e4ec2107" as url
 call  apoc.load.json(url) yield value
 unwind value.records as q
-merge (antenne:Antenne {id:q.datasetid}) ON CREATE SET antenne.nom = q.fields.adm_lb_nom
+merge (antenne:Antenne {id:q.fields.id}) ON CREATE SET antenne.nom = q.fields.adm_lb_nom
+
+et affichage par :
+MATCH (Antenne)
+RETURN Antenne
+
+J'ai l'impression qu'il limite la création de noeuds à 100, faudra checker ça...
