@@ -11,7 +11,10 @@ SET a = record["fields"]
 ```
 MATCH (a:antenne)
 WITH DISTINCT a.coordonnees AS coords
-CREATE (b:lieu {coordonnees: coords})
+WITH
+    b,
+    split(b.coordonnees, ',') AS coords
+CREATE (b:lieu {coordonnees: coords, longitude: toFloat(coords[0]), latitude: toFloat(coords[1])})
 ```
 
 # Création des relations de proximité entre chaque lieux
@@ -20,7 +23,7 @@ MATCH (a:lieu)
 CALL {
     WITH a
     MATCH  (b: lieu)
-    WHERE a.id <> b.id
+    WHERE a.coordonnees <> b.coordonnees
     WITH
         b,
         split(a.coordonnees, ',') AS coords_a,
