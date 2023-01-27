@@ -39,7 +39,7 @@ CALL {
 MERGE (a)-[:NEAR]-(b)
 ```
 
-# Connexion des antennes à leur lieu respectif
+# Connexion des antennes à leur lieu respectif (todo)
 ```
 MATCH (a:antenne)
 CALL {
@@ -49,4 +49,18 @@ CALL {
     RETURN b
 }
 MERGE (a)-[:AT]->(b)
+```
+
+# Recommendation (Brouillon)
+```
+CREATE (u:utilisateur {coordonnees: ""})
+
+MATCH (u:utilisateur)
+WITH u
+MATCH (a:antenne {id: 500})
+MERGE (u)-[:USES]->(a)
+
+MATCH (u:utilisateur)-[:USES]->(a: antenne)-[:AT]->(l:lieu)<-[:AT]-(b:antenne)
+RETURN b
+
 ```
