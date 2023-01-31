@@ -1,10 +1,10 @@
-# Création des noeuds antenne à partir de l'API
+# Création des noeuds antenne à partir de l'API (Limité à 1000 antennes)
 ```
-with "https://data.anfr.fr/api/records/2.0/downloadfile/format=json&resource_id=88ef0887-6b0f-4d3f-8545-6d64c8f597da" as url
+with "https://data.anfr.fr/api/records/2.0/search/resource_id=88ef0887-6b0f-4d3f-8545-6d64c8f597da&distinct=true&limit=1000&offset=0" as url
 call  apoc.load.json(url) yield value
-UNWIND value["records"] as record
+UNWIND value["result"]["records"] as record
 CREATE (a:antenne)
-SET a = record["fields"]
+SET a = record
 ```
 
 # Création d'un lieu par groupement d'antenne sur une même coordonnée
