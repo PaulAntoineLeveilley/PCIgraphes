@@ -44,7 +44,7 @@ MATCH (a:antenne)
 CALL {
     WITH a
     MATCH (b: lieu)
-    WHERE a.coordonnees = b.coordonnees
+    WHERE split(a.coordonnees, ",") = b.coordonnees
     RETURN b
 }
 MERGE (a)-[:AT]->(b)
