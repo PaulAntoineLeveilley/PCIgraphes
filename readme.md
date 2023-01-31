@@ -25,8 +25,8 @@ CALL {
     WHERE a.coordonnees <> b.coordonnees
     WITH
         b,
-        split(a.coordonnees, ',') AS coords_a,
-        split(b.coordonnees, ',') AS coords_b
+        a.coordonnees AS coords_a,
+        b.coordonnees AS coords_b
     WITH
         b, coords_a, coords_b,
         point({longitude: toFloat(coords_a[0]), latitude: toFloat(coords_a[1])}) AS pa,
