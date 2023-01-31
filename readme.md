@@ -1,6 +1,6 @@
 # Création des noeuds antenne à partir de l'API
 ```
-with "https://data.anfr.fr/api/records/1.0/search/dataset=dd11fac6-4531-4a27-9c8c-a3a9e4ec2107" as url
+with "https://data.anfr.fr/api/records/2.0/downloadfile/format=json&resource_id=88ef0887-6b0f-4d3f-8545-6d64c8f597da" as url
 call  apoc.load.json(url) yield value
 UNWIND value["records"] as record
 CREATE (a:antenne)
