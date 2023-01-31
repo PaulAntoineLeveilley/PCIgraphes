@@ -4,7 +4,7 @@ with "https://data.anfr.fr/api/records/2.0/search/resource_id=88ef0887-6b0f-4d3f
 call  apoc.load.json(url) yield value
 UNWIND value["result"]["records"] as record
 CREATE (a:antenne)
-SET a = record
+SET a = properties(record)
 ```
 
 # Création d'un lieu par groupement d'antenne sur une même coordonnée
