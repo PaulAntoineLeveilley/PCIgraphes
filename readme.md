@@ -10,10 +10,9 @@ SET a = record["fields"]
 # Création d'un lieu par groupement d'antenne sur une même coordonnée
 ```
 MATCH (a:antenne)
-WITH DISTINCT a.coordonnees AS coords
+WITH DISTINCT a.coordonnees AS unformated_coords
 WITH
-    b,
-    split(b.coordonnees, ',') AS coords
+    split(unformated_coords, ',') AS coords
 CREATE (b:lieu {coordonnees: coords, longitude: toFloat(coords[0]), latitude: toFloat(coords[1])})
 ```
 
