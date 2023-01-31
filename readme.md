@@ -52,14 +52,12 @@ MERGE (a)-[:AT]->(b)
 
 # Recommendation (Brouillon)
 ```
-CREATE (u:utilisateur {coordonnees: ""})
+CREATE (u:utilisateur)
 
 MATCH (u:utilisateur)
-WITH u
-MATCH (a:antenne {id: 500})
-MERGE (u)-[:USES]->(a)
+MATCH (l:lieu {coordonnees: ["44.916111111111", " -.225"]})
+MERGE (u)-[:USES]->(l)
 
-MATCH (u:utilisateur)-[:USES]->(a: antenne)-[:AT]->(l:lieu)<-[:AT]-(b:antenne)
-RETURN b
-
+MATCH (u:utilisateur)-[:USES]->(l: lieu)<-[:AT]-(a:antenne)
+RETURN a
 ```
