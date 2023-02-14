@@ -7,6 +7,17 @@ CREATE (a:antenne)
 SET a = properties(record)
 ```
 
+# Ajout des champs longitude et latitude aux antennes pour une meilleure facilité d'utilisation
+```
+MATCH (a:antenne)
+WITH DISTINCT a, a.coordonnees AS unformated_coords
+WITH
+    a, split(unformated_coords, ',') AS coords
+SET a.longitude = toFloat(coords[0])
+SET a.latitude = toFloat(coords[1])
+RETURN a.longitude, a.latitude
+```
+
 # Création d'un lieu par groupement d'antenne sur une même coordonnée
 ```
 MATCH (a:antenne)
