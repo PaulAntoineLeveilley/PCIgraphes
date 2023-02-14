@@ -61,6 +61,16 @@ CALL {
 MERGE (a)-[:AT]->(b)
 ```
 
+# Évaluation de l'antenne
+```
+MATCH (a:antenne)
+WITH
+    a,
+    substring(a.generation, 0, 1) as gen
+SET a.value = toFloat(gen)/5
+RETURN a
+```
+
 # Recommendation (Brouillon)
 ```
 CREATE (u:utilisateur)
