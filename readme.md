@@ -92,4 +92,10 @@ WITH
 SET a1.valuation1 = valuation1
 SET a2.valuation2 = valuation2
 RETURN *
+
+MATCH (a:antenne)
+WHERE a.valuation IS NOT NULL
+WITH a
+ORDER BY a.valuation DESC
+RETURN a.valuation, a.adm_lb_nom
 ```
