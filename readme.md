@@ -76,7 +76,7 @@ RETURN a
 CREATE (u:utilisateur)
 
 MATCH (u:utilisateur)
-MATCH (l:lieu {coordonnees: ["44.916111111111", " -.225"]})
+MATCH (l:lieu {coordonnees: ["46.2025"," 5.221388888889"]})
 MERGE (u)-[:USES]->(l)
 
 MATCH (u:utilisateur)-[:USES]->(l: lieu)<-[:AT]-(a:antenne)
