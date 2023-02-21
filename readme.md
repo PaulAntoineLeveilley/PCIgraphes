@@ -81,4 +81,15 @@ MERGE (u)-[:USES]->(l)
 
 MATCH (u:utilisateur)-[:USES]->(l: lieu)<-[:AT]-(a:antenne)
 RETURN a
+
+MATCH (u:utilisateur)-[:USES]->(l1:lieu)-[:NEAR]-(l2:lieu)
+MATCH (l1:lieu)<-[:AT]-(a1:antenne)
+MATCH (l2:lieu)<-[:AT]-(a2:antenne)
+WITH
+    *,
+    (a1.value/(1+point.distance(point(l1), point(l1)))) as valuation1,
+    (a2.value/(1+point.distance(point(l1), point(l2)))) as valuation2
+SET a1.valuation1 = valuation1
+SET a2.valuation2 = valuation2
+RETURN *
 ```
