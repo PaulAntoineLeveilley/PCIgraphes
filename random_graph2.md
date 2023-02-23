@@ -17,6 +17,7 @@ CALL apoc.periodic.commit("
   LIMIT 1
   WHERE n1 <> n2 AND NOT (n1)-[]-(n2) AND NOT (n2)-[]-(n1)
   CREATE (n1)-[:RELATION {metric_value: toInteger(rand() * 1400) + 100, bandwidth: toInteger(rand() * 50) + 20}] -> (n2)
+  CREATE (n2)-[:RELATION {metric_value: toInteger(rand() * 1400) + 100, bandwidth: toInteger(rand() * 50 + 20)}] -> (n1)
   RETURN COUNT(*)
 ", {iterations:10000000, batchSize:10000000})
 ```
