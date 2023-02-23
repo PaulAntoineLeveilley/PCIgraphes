@@ -15,7 +15,7 @@ CALL apoc.periodic.commit("
   WITH n1, n2, rand() AS r
   ORDER BY r
   LIMIT 1
-  WHERE n1 <> n2 AND NOT (n1)-[:RELATION]->(n2)
+  WHERE n1 <> n2 AND NOT (n1)-[]-(n2) AND NOT (n2)-[]-(n1)
   CREATE (n1)-[:RELATION {metric_value: toInteger(rand() * 1400) + 100, bandwidth: toInteger(rand() * 50) + 20}] -> (n2)
   RETURN COUNT(*)
 ", {iterations:10000000, batchSize:10000000})
