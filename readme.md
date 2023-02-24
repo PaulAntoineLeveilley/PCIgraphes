@@ -1,10 +1,21 @@
 # Création des noeuds antenne à partir de l'API (Limité à 1000 antennes)
 ```
-with "https://data.anfr.fr/api/records/2.0/search/resource_id=88ef0887-6b0f-4d3f-8545-6d64c8f597da&distinct=true&limit=1000&offset=0" as url
+with "https://data.anfr.fr/api/records/2.0/search/resource_id=88ef0887-6b0f-4d3f-8545-6d64c8f597da&distinct=true&limit=1000&offset=0&sort=%22adr_nm_cp%22" as url
 call  apoc.load.json(url) yield value
 UNWIND value["result"]["records"] as record
 CREATE (a:antenne)
 SET a = properties(record)
+```
+
+# Ajout des champs longitude et latitude aux antennes pour une meilleure facilité d'utilisation
+```
+MATCH (a:antenne)
+WITH DISTINCT a, a.coordonnees AS unformated_coords
+WITH
+    a, split(unformated_coords, ',') AS coords
+SET a.longitude = toFloat(coords[0])
+SET a.latitude = toFloat(coords[1])
+RETURN a.longitude, a.latitude
 ```
 
 # Création d'un lieu par groupement d'antenne sur une même coordonnée
@@ -50,14 +61,41 @@ CALL {
 MERGE (a)-[:AT]->(b)
 ```
 
+# Évaluation de l'antenne
+```
+MATCH (a:antenne)
+WITH
+    a,
+    substring(a.generation, 0, 1) as gen
+SET a.value = toFloat(gen)/5
+RETURN a
+```
+
 # Recommendation (Brouillon)
 ```
 CREATE (u:utilisateur)
 
 MATCH (u:utilisateur)
-MATCH (l:lieu {coordonnees: ["44.916111111111", " -.225"]})
+MATCH (l:lieu {coordonnees: ["46.2025"," 5.221388888889"]})
 MERGE (u)-[:USES]->(l)
 
 MATCH (u:utilisateur)-[:USES]->(l: lieu)<-[:AT]-(a:antenne)
 RETURN a
+
+MATCH (u:utilisateur)-[:USES]->(l1:lieu)-[:NEAR]-(l2:lieu)
+MATCH (l1:lieu)<-[:AT]-(a1:antenne)
+MATCH (l2:lieu)<-[:AT]-(a2:antenne)
+WITH
+    *,
+    (a1.value/(1+point.distance(point(l1), point(l1)))) as valuation1,
+    (a2.value/(1+point.distance(point(l1), point(l2)))) as valuation2
+SET a1.valuation1 = valuation1
+SET a2.valuation2 = valuation2
+RETURN *
+
+MATCH (a:antenne)
+WHERE a.valuation IS NOT NULL
+WITH a
+ORDER BY a.valuation DESC
+RETURN a.valuation, a.adm_lb_nom
 ```
