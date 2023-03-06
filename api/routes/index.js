@@ -54,7 +54,7 @@ router.get('/shortest-path/:startNode/:endNode', async (req, res) => {
 
   // Run query and return results
   const session = driver.session({database: 'network'});
-  const result = await session.run(query, { startNodeId, endNodeId });
+  const result = await session.run(query, { startNodeId: parseInt(startNodeId), endNodeId: parseInt(endNodeId) });
   void session.close();
 
   const paths = {
