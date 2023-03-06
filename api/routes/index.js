@@ -1,15 +1,15 @@
-var express = require('express');
-var router = express.Router();
-var neo4j = require('neo4j-driver');
+const express = require('express');
+const router = express.Router();
+const neo4j = require('neo4j-driver');
 
 // Set up Neo4j driver
-var driver = neo4j.driver('neo4j://localhost:7687/network', neo4j.auth.basic('neo4j', '12345678'));
+const driver = neo4j.driver('neo4j://localhost:7687/network', neo4j.auth.basic('neo4j', '12345678'));
 
 /**
  * @swagger
  * /shortest-path/{startNode}/{endNode}:
  *   get:
- *     summary: Get 2 shortest paths between two nodes.
+ *     summary: Get the shortest path between two nodes.
  *     parameters:
  *       - name: startNode
  *         in: path
@@ -25,7 +25,7 @@ var driver = neo4j.driver('neo4j://localhost:7687/network', neo4j.auth.basic('ne
  *           type: integer
  *     responses:
  *       '200':
- *         description: A list of 2 shortest paths.
+ *         description: The ordered list of nodes that constitute the shortest path.
  *         content:
  *           application/json:
  *             schema:
@@ -33,11 +33,7 @@ var driver = neo4j.driver('neo4j://localhost:7687/network', neo4j.auth.basic('ne
  *               items:
  *                 type: object
  *                 properties:
- *                   path1:
- *                     type: array
- *                     items:
- *                       type: object
- *                   path2:
+ *                   path:
  *                     type: array
  *                     items:
  *                       type: object
@@ -49,26 +45,22 @@ router.get('/shortest-path/:startNode/:endNode', async (req, res) => {
   // Define Cypher query
   const query = `
     MATCH (a)
-    WHERE ID(a) = 12
+    WHERE ID(a) = $startNodeId
     MATCH (b)
-    WHERE ID(b) = 43
-    MATCH p1 = shortestPath((a)-[*]-(b))
-    MATCH p2 = shortestPath((a)-[*]-(b))
-    RETURN collect(nodes(p1)) as path1, collect(nodes(p2)) as path2
+    WHERE ID(b) = $endNodeId
+    MATCH p = shortestPath((a)-[*]-(b))
+    RETURN collect(nodes(p)) as path
   `;
 
   // Run query and return results
   const session = driver.session({database: 'network'});
   const result = await session.run(query, { startNodeId, endNodeId });
-  session.close();
+  void session.close();
 
   const paths = {
-    path1: result.records[0].get('path1')[0].map(node => ({
+    path: result.records[0].get('path')[0].map(node => ({
       id: node.identity.toNumber()
     })),
-    path2: result.records[0].get('path2')[0].map(node => ({
-      id: node.identity.toNumber()
-    }))
   };
 
   res.send(paths);
@@ -106,7 +98,7 @@ router.put('/deactivate-edge/:edgeId', async (req, res) => {
   // Run query and return success or failure message
   const session = driver.session({database: 'network'});
   const result = await session.run(query, { edgeId });
-  session.close();
+  void session.close();
 
   if (result.summary.counters.relationshipsUpdated() === 1) {
     res.send('Edge deactivated successfully.');
@@ -162,7 +154,7 @@ router.get('/graph', async (req, res) => {
   // Run query and return results
   const session = driver.session({database: 'network'});
   const result = await session.run(query);
-  session.close();
+  void session.close();
 
   const nodes = result.records[0].get('nodes').map(node => ({
     id: node.id.toNumber()
