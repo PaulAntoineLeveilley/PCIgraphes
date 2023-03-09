@@ -48,8 +48,23 @@ router.get('/shortest-path/:startNode/:endNode', async (req, res) => {
     WHERE ID(a) = $startNodeId
     MATCH (b)
     WHERE ID(b) = $endNodeId
-    MATCH p = shortestPath((a)-[:REL*]-(b))
-    RETURN collect(nodes(p)) as path
+    CALL gds.shortestPath.dijkstra.stream('network', {
+      sourceNode: a,
+      targetNode: b,
+      relationshipWeightProperty: 'metricValue',
+      relationshipType: 'REL'
+    })
+    YIELD index, sourceNode, targetNode, totalCost, nodeIds, costs, path
+    RETURN
+    index,
+    gds.util.asNode(sourceNode).name AS sourceNodeName,
+    gds.util.asNode(targetNode).name AS targetNodeName,
+    totalCost,
+    [nodeId IN nodeIds | gds.util.asNode(nodeId).name] AS nodeNames,
+    costs,
+    nodes(path) as path
+    ORDER BY index
+    LIMIT 1
   `;
 
   // Run query and return results
