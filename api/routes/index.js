@@ -137,9 +137,9 @@ router.put('/deactivate-edge/:edgeId', async (req, res) => {
  *           type: integer
  *     responses:
  *       '200':
- *         description: The edge was deactivated successfully.
+ *         description: The edge was activated successfully.
  *       '500':
- *         description: Failed to deactivate the edge.
+ *         description: Failed to activate the edge.
  */
 router.put('/activate-edge/:edgeId', async (req, res) => {
   const edgeId = req.params.edgeId;
