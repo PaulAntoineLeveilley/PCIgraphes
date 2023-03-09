@@ -52,7 +52,7 @@ router.get('/shortest-path/:startNode/:endNode', async (req, res) => {
       sourceNode: a,
       targetNode: b,
       relationshipWeightProperty: 'metricValue',
-      relationshipType: 'REL'
+      relationshipTypes: 'REL'
     })
     YIELD index, sourceNode, targetNode, totalCost, nodeIds, costs, path
     RETURN
