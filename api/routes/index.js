@@ -280,9 +280,9 @@ router.get('/graph', async (req, res) => {
 router.get('/saturated', async (req, res) => {
   // Define Cypher query
   const query = `
-    MATCH (n)-[r]->()
-    WHERE 
-    WITH r.bandwidth > 100
+    MATCH ()-[r]->()
+    WITH r
+    WHERE r.bandwidth > 100
     RETURN collect(DISTINCT {id: id(r), startNodeId: id(startNode(r)), endNodeId: id(endNode(r)), bandwidth: r.bandwidth, metricValue: r.metricValue}) as edges
   `;
 
