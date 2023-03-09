@@ -48,7 +48,7 @@ router.get('/shortest-path/:startNode/:endNode', async (req, res) => {
     WHERE ID(a) = $startNodeId
     MATCH (b)
     WHERE ID(b) = $endNodeId
-    MATCH p = shortestPath((a)-[*]-(b))
+    MATCH p = shortestPath((a)-[:REL*]-(b))
     RETURN collect(nodes(p)) as path
   `;
 
@@ -89,22 +89,65 @@ router.put('/deactivate-edge/:edgeId', async (req, res) => {
 
   // Define Cypher query
   const query = `
-    MATCH (a)-[r]->(b)
-    WHERE id(r) = $edgeId
-    SET r.active = false
-    RETURN r
+    MATCH (a)-[r:REL]->(b) 
+    WHERE ID(r) = $edgeId
+    CALL apoc.refactor.setType(r,'REL_OFF') YIELD output
+    RETURN output
   `;
 
   // Run query and return success or failure message
   const session = driver.session({database: 'network'});
-  const result = await session.run(query, { edgeId });
+  const result = await session.run(query, { edgeId: parseInt(edgeId) });
   void session.close();
 
-  if (result.summary.counters.relationshipsUpdated() === 1) {
+  if (result.records.length === 1) {
     res.send('Edge deactivated successfully.');
   } else {
     res.status(500).send('Failed to deactivate edge.');
   }
+
+});
+
+/**
+ * @swagger
+ * /activate-edge/{edgeId}:
+ *   put:
+ *     summary: Activate a single edge.
+ *     parameters:
+ *       - name: edgeId
+ *         in: path
+ *         required: true
+ *         description: The ID of the edge.
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       '200':
+ *         description: The edge was deactivated successfully.
+ *       '500':
+ *         description: Failed to deactivate the edge.
+ */
+router.put('/activate-edge/:edgeId', async (req, res) => {
+  const edgeId = req.params.edgeId;
+
+  // Define Cypher query
+  const query = `
+    MATCH (a)-[r:REL_OFF]->(b) 
+    WHERE ID(r) = $edgeId
+    CALL apoc.refactor.setType(r,'REL') YIELD output
+    RETURN output
+  `;
+
+  // Run query and return success or failure message
+  const session = driver.session({database: 'network'});
+  const result = await session.run(query, { edgeId: parseInt(edgeId) });
+  void session.close();
+
+  if (result.records.length === 1) {
+    res.send('Edge activated successfully.');
+  } else {
+    res.status(500).send('Failed to activate edge.');
+  }
+
 });
 
 /**
