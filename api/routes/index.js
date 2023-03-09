@@ -5,6 +5,26 @@ const neo4j = require('neo4j-driver');
 // Set up Neo4j driver
 const driver = neo4j.driver('neo4j://localhost:7687/network', neo4j.auth.basic('neo4j', '12345678'));
 
+
+const query_proj_add = `
+  CALL gds.graph.project(
+  'network',            
+  '*',             
+  'REL',
+  {
+      relationshipProperties: 'metricValue'
+  }              
+  )
+  YIELD
+    graphName AS graph, nodeProjection, nodeCount AS nodes, relationshipProjection, relationshipCount AS rels
+  `;
+
+const query_proj_delete = `
+  CALL gds.graph.drop('network') YIELD graphName;
+  `;
+
+
+
 /**
  * @swagger
  * /shortest-path/{startNode}/{endNode}:
@@ -52,15 +72,12 @@ router.get('/shortest-path/:startNode/:endNode', async (req, res) => {
       sourceNode: a,
       targetNode: b,
       relationshipWeightProperty: 'metricValue',
-      relationshipTypes: 'REL'
+      relationshipTypes: ['REL']
     })
     YIELD index, sourceNode, targetNode, totalCost, nodeIds, costs, path
     RETURN
     index,
-    gds.util.asNode(sourceNode).name AS sourceNodeName,
-    gds.util.asNode(targetNode).name AS targetNodeName,
     totalCost,
-    [nodeId IN nodeIds | gds.util.asNode(nodeId).name] AS nodeNames,
     costs,
     nodes(path) as path
     ORDER BY index
@@ -69,11 +86,14 @@ router.get('/shortest-path/:startNode/:endNode', async (req, res) => {
 
   // Run query and return results
   const session = driver.session({database: 'network'});
+  const res_delete = await session.run(query_proj_delete); 
+  const res_add = await session.run(query_proj_add);
   const result = await session.run(query, { startNodeId: parseInt(startNodeId), endNodeId: parseInt(endNodeId) });
+
   void session.close();
 
   const paths = {
-    path: result.records[0].get('path')[0].map(node => ({
+    path: result.records[0].get('path').map(node => ({
       id: node.identity.toNumber()
     })),
   };
