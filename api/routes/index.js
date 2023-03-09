@@ -228,4 +228,60 @@ router.get('/graph', async (req, res) => {
   res.send({ nodes, edges });
 });
 
+/**
+ * @swagger
+ * /saturated:
+ *   get:
+ *     summary: Get the saturated edges.
+ *     responses:
+ *       '200':
+ *         description: The saturated edges.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 edges:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: integer
+ *                       startNode:
+ *                         type: integer
+ *                       endNode:
+ *                         type: integer
+ *                       bandwidth:
+ *                         type: integer
+ *                       metricValue:
+ *                         type: integer
+ */
+router.get('/saturated', async (req, res) => {
+  // Define Cypher query
+  const query = `
+    MATCH (n)-[r]->()
+    WHERE 
+    WITH r.bandwidth > 100
+    RETURN collect(DISTINCT {id: id(r), startNodeId: id(startNode(r)), endNodeId: id(endNode(r)), bandwidth: r.bandwidth, metricValue: r.metricValue}) as edges
+  `;
+
+  // Run query and return results
+  const session = driver.session({database: 'network'});
+  const result = await session.run(query);
+  void session.close();
+
+  const edges = result.records[0].get('edges').map(edge => ({
+    id: edge.id.toNumber(),
+    startNode: edge.startNodeId.toNumber(),
+    endNode: edge.endNodeId.toNumber(),
+    bandwidth: edge.bandwidth.toNumber(),
+    metricValue: edge.metricValue.toNumber()
+  }));
+
+  res.send({ edges });
+});
+
+
+
 module.exports = router;
